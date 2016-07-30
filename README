@@ -1,0 +1,83 @@
+/****************************************
+ *Genetic Algorithm with Wind Farm Application Libraries
+ * 
+ * Gary Yan, Peter Zhang
+ * June 13,2012
+ ****************************************/
+
+- Was developed using Armadillo-3.0, but a newer version is available at http://arma.sourceforge.net/download.html
+
+
+
+--------------Libraries:
+There are three major parts to the code:
+
+- libGA.a
+  - contains the functions required for a general GA optimization problem.  GAProblem and GAControl class and member function definitions 
+    are included here
+  - consists of files:
+    -GA.cc
+    -src/GAProblem.cc
+    -src/GAControl.cc
+    
+- libWindFarmEvaluation.a
+  - contains functions used for the wind farm problem.  Contains the power generation calculation and noise generation for receptor uniformly spaced 40m apart on a 2000m x 2000m square piece of land
+  - consists of files:
+    -WindFarmEvaluation.cc
+    -GAdriver.cc
+
+-GAdriveruser.cc
+  - defines parameters in the GA.(in this case the Wind farm optimization)
+
+-----------------Building
+- to compile the updated code, type 
+
+  make
+
+on the command line (development used bash) This will compile the source code according to what has changed.
+If only GAdriveruser.cc has changed, only that will be compiled.
+If any item in the dependency list of libWindFarmEvaluation.a has changed, that and GAdriveruser.cc will be compiled
+If any item in the dependency list of libGA.a has changed, that, libWindFarmEvaluation.a, and GAdriveruser.cc will be compiled
+
+type: 
+
+make clean
+make
+
+to recompile all sources
+
+-----------------Running
+- Once the code is compiled, type
+
+./ga
+
+to run the code.  
+
+
+
+-----------------GAdriveruser.cc---------
+Defining Parameters
+- The application needs to be written by the user in a file, called say GAdriveruser.cc
+- There are 2 options for parameter definitions:
+  - calling readFile will read inputs in the specified format in a file called files/_input.dat 
+  - calling set functions in GAProblem and GAControl class can set parameters as well (see sample GAdriveruser.cc code)
+
+
+Defining Constraints
+One way of defining land constraints is through boolean evaluations.  In the sample GAdriveruser.cc, land constraints were specified using the input coordinate vector x.  A count variable is used to measure the degree of constraint violation by checking if the x-y positions are inside the restricted region.  
+
+
+
+- if there are more than 2 objectives, or 2 inequality constraints, or 2 equality constraints, may need to define additional function prototypes in GA.hh
+
+
+
+
+------------------Some Ideas for Future Work
+- add other methods of fitness assignment (SPEA, etc) and add to call list in fitnessAssignment function
+- add other constraint handling method e.g.:
+  - constrained BIN-TOUR, where the normal BIN-TOUR is replaced by selecting:
+    - if both are feasible, pick the higher fitness
+    - if one is feasible and the other is not, pick the feasible
+    - if both are infeasible, pick the one with "lower" constraint violation
+- add hypervolume indicator computation for nObj > 2.  This is the largest remaining obstacle for generalization of the GA code for n Objectives.  Other parts handle the general n case well (e.g. the crowding distance computation was checked by hand for n = 3) Many sweeping algorithms are available online that can calculate this in O(n^(d-2) log n ) time
